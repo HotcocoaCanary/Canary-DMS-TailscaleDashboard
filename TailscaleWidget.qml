@@ -70,6 +70,11 @@ PluginComponent {
         return max;
     }
 
+
+    // The dot grid is square, so at the bar's icon size it reads bigger
+    // than the wide marks next to it: give it a slightly smaller box
+    readonly property int logoSize: Math.round(iconSize * 0.8)
+
     readonly property string scriptPath: Qt.resolvedUrl("tailscale-state.py").toString().replace(/^file:\/\//, "")
 
     popoutWidth: 440
@@ -384,15 +389,56 @@ PluginComponent {
         onTriggered: root.contentActive = false
     }
 
-    // --- Bar pill ---
+    // --- Brand logo ---
 
-    readonly property string pillIcon: {
+    // DankIcon only speaks Material Symbols, and tinting an SVG through
+    // MultiEffect's mask hard-thresholds its alpha (no antialiasing, no
+    // partial opacity), so the mark is drawn directly: a 3x3 grid of dots
+    // with the middle row and the bottom center one picked out, which is
+    // the Tailscale mark at the official 6:3 dot-to-gap proportion.
+    component TailscaleMark: Item {
+        id: mark
+
+        property int size: 16
+        property color color: Theme.surfaceText
+
+        implicitWidth: size
+        implicitHeight: size
+
+        Grid {
+            anchors.fill: parent
+            columns: 3
+            spacing: mark.size / 8
+
+            Repeater {
+                model: 9
+
+                Rectangle {
+                    required property int index
+
+                    readonly property bool lit: (index >= 3 && index <= 5) || index === 7
+
+                    width: mark.size / 4
+                    height: width
+                    radius: width / 2
+                    antialiasing: true
+                    color: mark.color
+                    opacity: lit ? 1 : 0.45
+                }
+            }
+        }
+    }
+
+    // Material glyph for the state ring in the popout header
+    readonly property string stateIcon: {
         if (!available || needsLogin)
             return "vpn_key_off";
         if (exitNode || prefs.exitNodeIP)
             return "vpn_lock";
         return running ? "vpn_key" : "vpn_key_off";
     }
+
+    // --- Bar pill ---
 
     readonly property color pillColor: {
         if (!available)
@@ -401,6 +447,10 @@ PluginComponent {
             return Theme.warning;
         if (!running)
             return Theme.surfaceVariantText;
+        // The logo is the same whatever the state, so routing through an exit
+        // node shows up as an accent-colored pill instead of its own glyph
+        if (exitNode || prefs.exitNodeIP)
+            return Theme.primary;
         return Theme.surfaceText;
     }
 
@@ -422,9 +472,8 @@ PluginComponent {
         Row {
             spacing: Theme.spacingXS
 
-            DankIcon {
-                name: root.pillIcon
-                size: root.iconSize
+            TailscaleMark {
+                size: root.logoSize
                 color: root.pillColor
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -443,9 +492,8 @@ PluginComponent {
         Column {
             spacing: Theme.spacingXS
 
-            DankIcon {
-                name: root.pillIcon
-                size: root.iconSize
+            TailscaleMark {
+                size: root.logoSize
                 color: root.pillColor
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -744,7 +792,7 @@ PluginComponent {
 
                                         DankIcon {
                                             anchors.centerIn: parent
-                                            name: root.pillIcon
+                                            name: root.stateIcon
                                             size: 20
                                             color: parent.border.color
                                         }
