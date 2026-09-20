@@ -2,6 +2,8 @@
 
 A read-only [DMS](https://github.com/AvengeMedia/DankMaterialShell) bar widget for Tailscale.
 
+![screenshot](screenshot.png)
+
 The pill shows the connection state as an icon plus how many peers are online. The popout is a status panel — it never changes anything, so it needs no privileges:
 
 - **This device:** a state ring, the Tailscale IP in large type, the hostname, the nearest relay and the client version. Click the card to copy the IP, or the button on its right to open the admin console in the browser.
