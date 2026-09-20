@@ -25,7 +25,7 @@ Bar display (peers online / online / total / this device's IP / icon only), hide
 ## Installation
 
 ```bash
-git clone https://github.com/HotcocoaCanary/Canary-DMS-Tailscale.git ~/.config/DankMaterialShell/plugins/tailscaleDashboard
+git clone https://github.com/HotcocoaCanary/Canary-DMS-TailscaleDashboard.git ~/.config/DankMaterialShell/plugins/tailscaleDashboard
 dms ipc call plugin-scan scan
 dms ipc call plugins enable tailscaleDashboard
 ```
