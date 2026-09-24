@@ -68,7 +68,10 @@ def node(raw, users, suffix, self_id):
     tags = raw.get("Tags") or []
     return {
         "id": raw.get("ID") or "",
-        "name": raw.get("HostName") or short or ipv4,
+        # The machine name from the admin console follows renames there,
+        # HostName is only what the device reports as its OS hostname
+        "name": short or raw.get("HostName") or ipv4,
+        "hostname": raw.get("HostName") or "",
         "short": short,
         "fqdn": dns,
         "os": raw.get("OS") or "",
