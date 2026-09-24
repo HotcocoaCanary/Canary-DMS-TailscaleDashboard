@@ -648,6 +648,105 @@ PluginComponent {
         }
     }
 
+    // A device: state ring with a glyph, the IP large, details below.
+    // Clicking copies the IP, the button opens the admin console.
+    component DeviceCard: Rectangle {
+        id: card
+        property color ring: Theme.success
+        property string icon: "devices"
+        property string title: ""
+        property string subtitle: ""
+        property bool dim: false
+        property string copyValue: ""
+        property string link: ""
+        width: parent.width
+        height: 72
+        radius: Theme.cornerRadius
+        color: cardArea.containsMouse ? Theme.withAlpha(Theme.surfaceText, 0.06) : Theme.surfaceContainerHigh
+
+        MouseArea {
+            id: cardArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (card.copyValue)
+                    root.copyText(card.copyValue);
+            }
+        }
+
+        Rectangle {
+            id: cardRing
+            anchors.left: parent.left
+            anchors.leftMargin: Theme.spacingM
+            anchors.verticalCenter: parent.verticalCenter
+            width: 44
+            height: 44
+            radius: 22
+            color: "transparent"
+            border.width: 3
+            border.color: card.ring
+
+            DankIcon {
+                anchors.centerIn: parent
+                name: card.icon
+                size: 20
+                color: card.ring
+            }
+        }
+
+        Column {
+            anchors.left: cardRing.right
+            anchors.leftMargin: Theme.spacingM
+            anchors.right: cardButton.left
+            anchors.rightMargin: Theme.spacingS
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 2
+
+            StyledText {
+                width: parent.width
+                text: card.title
+                font.pixelSize: Theme.fontSizeLarge + 2
+                font.weight: Font.DemiBold
+                isMonospace: true
+                elide: Text.ElideRight
+                color: card.dim ? Theme.surfaceVariantText : Theme.surfaceText
+            }
+            StyledText {
+                width: parent.width
+                text: card.subtitle
+                elide: Text.ElideRight
+                font.pixelSize: 11
+                color: Theme.surfaceVariantText
+            }
+        }
+
+        IconButton {
+            id: cardButton
+            anchors.right: parent.right
+            anchors.rightMargin: Theme.spacingS
+            anchors.verticalCenter: parent.verticalCenter
+            width: 32
+            height: 32
+            radius: 16
+            icon: "open_in_new"
+            onClicked: root.openUrl(card.link)
+        }
+    }
+
+    function peerSubtitle(d) {
+        var parts = [d.name];
+        if (d.exitNode)
+            parts.push(tr("Exit node"));
+        if (!d.online)
+            parts.push(d.lastSeen ? ago(d.lastSeen) : tr("offline"));
+        else if (d.curAddr)
+            parts.push(tr("direct"));
+        else
+            parts.push(d.relay ? tr("Relay") + " " + d.relay : tr("relay"));
+        return parts.join("  ·  ");
+    }
+
     // --- Popout ---
 
     popoutContent: Component {
@@ -762,88 +861,23 @@ PluginComponent {
                                 }
 
                                 // ============ This device ============
-                                Rectangle {
+                                DeviceCard {
                                     width: content.width
-                                    height: 72
-                                    radius: Theme.cornerRadius
-                                    color: Theme.surfaceContainerHigh
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (root.selfNode)
-                                                root.copyText(root.selfNode.ip);
-                                        }
+                                    ring: root.running ? Theme.success : root.needsLogin ? Theme.warning : Theme.surfaceVariantText
+                                    icon: root.stateIcon
+                                    title: root.selfNode ? root.selfNode.ip : root.stateText(root.backendState)
+                                    subtitle: {
+                                        if (!root.selfNode)
+                                            return "";
+                                        var parts = [root.selfNode.name];
+                                        if (root.selfNode.relay)
+                                            parts.push(root.tr("Relay") + " " + root.selfNode.relay);
+                                        if (root.snapshot.version)
+                                            parts.push("v" + root.snapshot.version);
+                                        return parts.join("  ·  ");
                                     }
-
-                                    Rectangle {
-                                        id: stateRing
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: Theme.spacingM
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 44
-                                        height: 44
-                                        radius: 22
-                                        color: "transparent"
-                                        border.width: 3
-                                        border.color: root.running ? Theme.success : root.needsLogin ? Theme.warning : Theme.surfaceVariantText
-
-                                        DankIcon {
-                                            anchors.centerIn: parent
-                                            name: root.stateIcon
-                                            size: 20
-                                            color: parent.border.color
-                                        }
-                                    }
-
-                                    Column {
-                                        anchors.left: stateRing.right
-                                        anchors.leftMargin: Theme.spacingM
-                                        anchors.right: adminButton.left
-                                        anchors.rightMargin: Theme.spacingS
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 2
-
-                                        StyledText {
-                                            width: parent.width
-                                            text: root.selfNode ? root.selfNode.ip : root.stateText(root.backendState)
-                                            font.pixelSize: Theme.fontSizeLarge + 2
-                                            font.weight: Font.DemiBold
-                                            isMonospace: true
-                                            elide: Text.ElideRight
-                                            color: Theme.surfaceText
-                                        }
-                                        StyledText {
-                                            width: parent.width
-                                            text: {
-                                                if (!root.selfNode)
-                                                    return "";
-                                                var parts = [root.selfNode.name];
-                                                if (root.selfNode.relay)
-                                                    parts.push(root.tr("Relay") + " " + root.selfNode.relay);
-                                                if (root.snapshot.version)
-                                                    parts.push("v" + root.snapshot.version);
-                                                return parts.join("  ·  ");
-                                            }
-                                            elide: Text.ElideRight
-                                            font.pixelSize: 11
-                                            color: Theme.surfaceVariantText
-                                        }
-                                    }
-
-                                    IconButton {
-                                        id: adminButton
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: Theme.spacingS
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        width: 32
-                                        height: 32
-                                        radius: 16
-                                        icon: "open_in_new"
-                                        onClicked: root.openUrl(root.adminUrl + "/machines")
-                                    }
+                                    copyValue: root.selfNode ? root.selfNode.ip : ""
+                                    link: root.adminUrl + "/machines"
                                 }
 
                                 // ============ Preference chips ============
@@ -952,105 +986,15 @@ PluginComponent {
                                     Repeater {
                                         model: root.visiblePeers
 
-                                        delegate: Item {
-                                            id: peerRow
-                                            readonly property var d: modelData
-                                            width: parent.width
-                                            height: 32
-
-                                            Rectangle {
-                                                anchors.fill: parent
-                                                radius: Theme.cornerRadius
-                                                color: peerArea.containsMouse ? Theme.withAlpha(Theme.surfaceText, 0.06) : "transparent"
-                                            }
-
-                                            MouseArea {
-                                                id: peerArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: root.copyText(peerRow.d.ip)
-                                            }
-
-                                            Row {
-                                                id: peerLead
-                                                anchors.left: parent.left
-                                                anchors.leftMargin: Theme.spacingXS
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                spacing: 6
-
-                                                Rectangle {
-                                                    width: 8
-                                                    height: 8
-                                                    radius: 4
-                                                    color: root.deviceColor(peerRow.d)
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                }
-                                                DankIcon {
-                                                    name: root.osIcon(peerRow.d.os)
-                                                    size: 15
-                                                    color: Theme.surfaceVariantText
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                }
-                                            }
-
-                                            Row {
-                                                anchors.left: peerLead.right
-                                                anchors.leftMargin: 6
-                                                anchors.right: peerTrail.left
-                                                anchors.rightMargin: 6
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                spacing: 6
-
-                                                StyledText {
-                                                    text: peerRow.d.name
-                                                    font.pixelSize: Theme.fontSizeSmall
-                                                    elide: Text.ElideRight
-                                                    color: Theme.surfaceText
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                }
-                                                StyledText {
-                                                    text: peerRow.d.ip
-                                                    font.pixelSize: 11
-                                                    isMonospace: true
-                                                    color: Theme.surfaceVariantText
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                }
-                                            }
-
-                                            Row {
-                                                id: peerTrail
-                                                anchors.right: parent.right
-                                                anchors.rightMargin: Theme.spacingXS
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                spacing: 2
-
-                                                Chip {
-                                                    visible: !peerArea.containsMouse
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    icon: peerRow.d.exitNode ? "vpn_lock" : peerRow.d.curAddr ? "bolt" : "cell_tower"
-                                                    active: peerRow.d.online
-                                                    label: {
-                                                        var d = peerRow.d;
-                                                        if (!d.online)
-                                                            return d.lastSeen ? root.ago(d.lastSeen) : root.tr("offline");
-                                                        if (d.curAddr)
-                                                            return root.tr("direct");
-                                                        return d.relay ? d.relay : root.tr("relay");
-                                                    }
-                                                }
-
-                                                IconButton {
-                                                    visible: peerArea.containsMouse
-                                                    icon: "content_copy"
-                                                    onClicked: root.copyText(peerRow.d.ip)
-                                                }
-                                                IconButton {
-                                                    visible: peerArea.containsMouse
-                                                    icon: "open_in_new"
-                                                    onClicked: root.openUrl(root.adminUrl + "/machines/" + peerRow.d.ip)
-                                                }
-                                            }
+                                        delegate: DeviceCard {
+                                            required property var modelData
+                                            ring: root.deviceColor(modelData)
+                                            icon: root.osIcon(modelData.os)
+                                            title: modelData.ip
+                                            subtitle: root.peerSubtitle(modelData)
+                                            dim: !modelData.online
+                                            copyValue: modelData.ip
+                                            link: root.adminUrl + "/machines/" + modelData.ip
                                         }
                                     }
                                 }
