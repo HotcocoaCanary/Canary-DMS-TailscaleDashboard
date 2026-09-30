@@ -553,24 +553,24 @@ PluginComponent {
         property bool warn: false
         readonly property color tint: warn ? Theme.warning : active ? Theme.primary : Theme.surfaceVariantText
         width: chipRow.implicitWidth + Theme.spacingS * 2
-        height: 22
-        radius: 11
+        height: chipRow.implicitHeight + Theme.spacingXS * 2
+        radius: Theme.fullRadius(width, height)
         color: Theme.withAlpha(chip.tint, warn || active ? 0.14 : 0.07)
 
         Row {
             id: chipRow
             anchors.centerIn: parent
-            spacing: 3
+            spacing: Theme.spacingXXS
 
             DankIcon {
                 name: chip.warn ? "warning" : chip.active ? chip.icon : "remove"
-                size: 12
+                size: Theme.fontSizeSmall
                 color: chip.tint
                 anchors.verticalCenter: parent.verticalCenter
             }
             StyledText {
                 text: chip.label
-                font.pixelSize: 11
+                font.pixelSize: Theme.fontSizeSmall
                 color: chip.active || chip.warn ? Theme.surfaceText : Theme.surfaceVariantText
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -582,9 +582,10 @@ PluginComponent {
         property string label: ""
         property string note: ""
         width: parent.width
-        height: 20
+        height: sectionLabel.implicitHeight + Theme.spacingXS
 
         StyledText {
+            id: sectionLabel
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             text: sectionTitle.label
@@ -596,7 +597,7 @@ PluginComponent {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             text: sectionTitle.note
-            font.pixelSize: 11
+            font.pixelSize: Theme.fontSizeSmall
             color: Theme.surfaceVariantText
         }
     }
@@ -606,45 +607,20 @@ PluginComponent {
         id: legendKey
         property color swatch: Theme.primary
         property string label: ""
-        spacing: 4
+        spacing: Theme.spacingXS
 
         Rectangle {
             width: 8
             height: 8
-            radius: 4
+            radius: height / 2
             color: legendKey.swatch
             anchors.verticalCenter: parent.verticalCenter
         }
         StyledText {
             text: legendKey.label
-            font.pixelSize: 11
+            font.pixelSize: Theme.fontSizeSmall
             color: Theme.surfaceVariantText
             anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    component IconButton: Rectangle {
-        id: iconButton
-        property string icon: ""
-        signal clicked
-        width: 24
-        height: 24
-        radius: 12
-        color: btnArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.18) : "transparent"
-
-        DankIcon {
-            anchors.centerIn: parent
-            name: iconButton.icon
-            size: Math.round(iconButton.width * 0.6)
-            color: Theme.surfaceText
-        }
-
-        MouseArea {
-            id: btnArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: iconButton.clicked()
         }
     }
 
@@ -659,8 +635,9 @@ PluginComponent {
         property bool dim: false
         property string copyValue: ""
         property string link: ""
+        readonly property real ringSize: Theme.iconSizeMedium + Theme.spacingM * 2
         width: parent.width
-        height: 72
+        height: Math.max(ringSize, cardText.implicitHeight) + Theme.spacingM * 2
         radius: Theme.cornerRadius
         color: cardArea.containsMouse ? Theme.withAlpha(Theme.surfaceText, 0.06) : Theme.surfaceContainerHigh
 
@@ -680,9 +657,9 @@ PluginComponent {
             anchors.left: parent.left
             anchors.leftMargin: Theme.spacingM
             anchors.verticalCenter: parent.verticalCenter
-            width: 44
-            height: 44
-            radius: 22
+            width: card.ringSize
+            height: card.ringSize
+            radius: Theme.fullRadius(width, height)
             color: "transparent"
             border.width: 3
             border.color: card.ring
@@ -690,18 +667,19 @@ PluginComponent {
             DankIcon {
                 anchors.centerIn: parent
                 name: card.icon
-                size: 20
+                size: Theme.iconSizeMedium
                 color: card.ring
             }
         }
 
         Column {
+            id: cardText
             anchors.left: cardRing.right
             anchors.leftMargin: Theme.spacingM
             anchors.right: cardButton.left
             anchors.rightMargin: Theme.spacingS
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 2
+            spacing: Theme.spacingXXS
 
             StyledText {
                 width: parent.width
@@ -716,20 +694,20 @@ PluginComponent {
                 width: parent.width
                 text: card.subtitle
                 elide: Text.ElideRight
-                font.pixelSize: 11
+                font.pixelSize: Theme.fontSizeSmall
                 color: Theme.surfaceVariantText
             }
         }
 
-        IconButton {
+        DankActionButton {
             id: cardButton
             anchors.right: parent.right
             anchors.rightMargin: Theme.spacingS
             anchors.verticalCenter: parent.verticalCenter
-            width: 32
-            height: 32
-            radius: 16
-            icon: "open_in_new"
+            buttonSize: Theme.buttonHeightXS
+            iconSize: Theme.iconSizeMedium
+            iconName: "open_in_new"
+            iconColor: Theme.surfaceText
             onClicked: root.openUrl(card.link)
         }
     }
@@ -765,17 +743,23 @@ PluginComponent {
 
             headerActions: Component {
                 Row {
-                    spacing: 2
+                    spacing: Theme.spacingXXS
 
-                    IconButton {
-                        icon: "refresh"
+                    DankActionButton {
+                        buttonSize: Theme.buttonHeightXXS
+                        iconSize: Theme.iconSizeSmall
+                        iconName: "refresh"
+                        iconColor: Theme.surfaceText
                         onClicked: {
                             root.refresh();
                             root.runNetcheck();
                         }
                     }
-                    IconButton {
-                        icon: "open_in_new"
+                    DankActionButton {
+                        buttonSize: Theme.buttonHeightXXS
+                        iconSize: Theme.iconSizeSmall
+                        iconName: "open_in_new"
+                        iconColor: Theme.surfaceText
                         onClicked: root.openUrl(root.adminUrl + "/machines")
                     }
                 }
@@ -854,7 +838,7 @@ PluginComponent {
                                             anchors.verticalCenter: parent.verticalCenter
                                             text: modelData
                                             wrapMode: Text.WordWrap
-                                            font.pixelSize: 11
+                                            font.pixelSize: Theme.fontSizeSmall
                                             color: Theme.surfaceText
                                         }
                                     }
@@ -979,7 +963,7 @@ PluginComponent {
                                         width: parent.width
                                         visible: root.visiblePeers.length === 0
                                         text: root.peers.length ? root.tr("No devices online") : root.tr("No other devices")
-                                        font.pixelSize: 11
+                                        font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.surfaceVariantText
                                     }
 
@@ -1029,7 +1013,7 @@ PluginComponent {
                                             id: trafficRow
                                             readonly property var d: modelData
                                             width: parent.width
-                                            height: 30
+                                            height: Theme.fontSizeSmall * 2 + Theme.spacingXS + Theme.spacingXXS
 
                                             StyledText {
                                                 id: trafficName
@@ -1038,7 +1022,7 @@ PluginComponent {
                                                 width: 90
                                                 text: trafficRow.d.name
                                                 elide: Text.ElideRight
-                                                font.pixelSize: 11
+                                                font.pixelSize: Theme.fontSizeSmall
                                                 color: Theme.surfaceVariantText
                                             }
 
@@ -1073,7 +1057,7 @@ PluginComponent {
                                                 width: 68
                                                 horizontalAlignment: Text.AlignRight
                                                 text: root.formatBytes(trafficRow.d.rx + trafficRow.d.tx)
-                                                font.pixelSize: 11
+                                                font.pixelSize: Theme.fontSizeSmall
                                                 isMonospace: true
                                                 color: Theme.surfaceText
                                             }
@@ -1096,13 +1080,13 @@ PluginComponent {
                                         visible: root.netRunning
 
                                         DankSpinner {
-                                            size: 14
+                                            size: Theme.iconSizeSmall
                                             running: root.netRunning
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
                                         StyledText {
                                             text: root.tr("Checking the network...")
-                                            font.pixelSize: 11
+                                            font.pixelSize: Theme.fontSizeSmall
                                             color: Theme.surfaceVariantText
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
@@ -1113,7 +1097,7 @@ PluginComponent {
                                         visible: !root.netRunning && root.derpRegions.length === 0
                                         text: root.netError ? root.netError : root.tr("Not checked yet")
                                         wrapMode: Text.WordWrap
-                                        font.pixelSize: 11
+                                        font.pixelSize: Theme.fontSizeSmall
                                         color: root.netError ? Theme.error : Theme.surfaceVariantText
                                     }
 
@@ -1124,7 +1108,7 @@ PluginComponent {
                                             id: derpRow
                                             readonly property var region: modelData
                                             width: parent.width
-                                            height: 22
+                                            height: Theme.fontSizeSmall + Theme.spacingS + Theme.spacingXXS
 
                                             StyledText {
                                                 id: regionName
@@ -1133,7 +1117,7 @@ PluginComponent {
                                                 width: 104
                                                 text: derpRow.region.name
                                                 elide: Text.ElideRight
-                                                font.pixelSize: 11
+                                                font.pixelSize: Theme.fontSizeSmall
                                                 font.weight: derpRow.region.preferred ? Font.Medium : Font.Normal
                                                 color: derpRow.region.preferred ? Theme.surfaceText : Theme.surfaceVariantText
                                             }
@@ -1155,7 +1139,7 @@ PluginComponent {
                                                 width: 56
                                                 horizontalAlignment: Text.AlignRight
                                                 text: Math.round(derpRow.region.ms) + " ms"
-                                                font.pixelSize: 11
+                                                font.pixelSize: Theme.fontSizeSmall
                                                 isMonospace: true
                                                 color: derpRow.region.preferred ? Theme.surfaceText : Theme.surfaceVariantText
                                             }
