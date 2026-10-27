@@ -1,6 +1,6 @@
 # Tailscale Dashboard
 
-A read-only [DMS](https://github.com/AvengeMedia/DankMaterialShell) bar widget for Tailscale.
+A read-only [Dux Shell](https://github.com/duxlabs-dev/dux-shell) bar widget for Tailscale.
 
 ![screenshot](screenshot.png)
 
@@ -27,9 +27,9 @@ Bar display (peers online / online / total / this device's IP / icon only), hide
 ## Installation
 
 ```bash
-git clone https://github.com/HotcocoaCanary/Canary-DMS-TailscaleDashboard.git ~/.config/DankMaterialShell/plugins/tailscaleDashboard
+git clone https://github.com/HotcocoaCanary/Canary-DMS-TailscaleDashboard.git ~/.config/dms/plugins/tailscaleDashboard
 dms ipc call plugin-scan scan
 dms ipc call plugins enable tailscaleDashboard
 ```
 
-Then add it to the bar under DMS Settings > Bar.
+Then add it to the bar under Settings > Bar.
