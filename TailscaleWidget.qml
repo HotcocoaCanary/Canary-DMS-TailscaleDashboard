@@ -4,6 +4,7 @@ import Quickshell.Io
 import qs.Common
 import qs.Services
 import qs.Widgets
+import qs.DCommon.Widgets
 import qs.Modules.Plugins
 import "translations.js" as Tr
 
@@ -391,7 +392,7 @@ PluginComponent {
 
     // --- Brand logo ---
 
-    // DankIcon only speaks Material Symbols, and tinting an SVG through
+    // DIcon only speaks Material Symbols, and tinting an SVG through
     // MultiEffect's mask hard-thresholds its alpha (no antialiasing, no
     // partial opacity), so the mark is drawn directly: a 3x3 grid of dots
     // with the middle row and the bottom center one picked out, which is
@@ -562,7 +563,7 @@ PluginComponent {
             anchors.centerIn: parent
             spacing: Theme.spacingXXS
 
-            DankIcon {
+            DIcon {
                 name: chip.warn ? "warning" : chip.active ? chip.icon : "remove"
                 size: Theme.fontSizeSmall
                 color: chip.tint
@@ -664,7 +665,7 @@ PluginComponent {
             border.width: 3
             border.color: card.ring
 
-            DankIcon {
+            DIcon {
                 anchors.centerIn: parent
                 name: card.icon
                 size: Theme.iconSizeMedium
@@ -699,7 +700,7 @@ PluginComponent {
             }
         }
 
-        DankActionButton {
+        DActionButton {
             id: cardButton
             anchors.right: parent.right
             anchors.rightMargin: Theme.spacingS
@@ -745,7 +746,7 @@ PluginComponent {
                 Row {
                     spacing: Theme.spacingXXS
 
-                    DankActionButton {
+                    DActionButton {
                         buttonSize: Theme.buttonHeightXXS
                         iconSize: Theme.iconSizeSmall
                         iconName: "refresh"
@@ -755,7 +756,7 @@ PluginComponent {
                             root.runNetcheck();
                         }
                     }
-                    DankActionButton {
+                    DActionButton {
                         buttonSize: Theme.buttonHeightXXS
                         iconSize: Theme.iconSizeSmall
                         iconName: "open_in_new"
@@ -796,7 +797,7 @@ PluginComponent {
                             color: Theme.surfaceVariantText
                         }
 
-                        DankFlickable {
+                        DFlickable {
                             id: flick
                             anchors.fill: parent
                             visible: root.available
@@ -819,7 +820,7 @@ PluginComponent {
                                         radius: Theme.cornerRadius
                                         color: Theme.withAlpha(Theme.warning, 0.12)
 
-                                        DankIcon {
+                                        DIcon {
                                             id: warnIcon
                                             anchors.left: parent.left
                                             anchors.leftMargin: Theme.spacingS
@@ -1079,7 +1080,7 @@ PluginComponent {
                                         spacing: Theme.spacingS
                                         visible: root.netRunning
 
-                                        DankSpinner {
+                                        DSpinner {
                                             size: Theme.iconSizeSmall
                                             running: root.netRunning
                                             anchors.verticalCenter: parent.verticalCenter
